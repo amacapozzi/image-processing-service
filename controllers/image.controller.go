@@ -48,7 +48,7 @@ func HandleRotateImage(c *fiber.Ctx) error {
 
 }
 
-func HandleGrayScale(c *fiber.Ctx) error {
+func HandleResizeImage(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("image")
 	if err != nil {
@@ -88,5 +88,35 @@ func HandleGrayScale(c *fiber.Ctx) error {
 
 	c.Set("Content-Type", "image/png")
 	return c.Send(resizedImage)
+
+}
+
+func HandleGrayScale(c *fiber.Ctx) error {
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		errors.HandleBadRequest(c, err)
+	}
+
+	multipartFile, err := file.Open()
+	if err != nil {
+		errors.HandleBadRequest(c, err)
+	}
+	defer multipartFile.Close()
+
+	var imgBuffer bytes.Buffer
+
+	if _, err := io.Copy(&imgBuffer, multipartFile); err != nil {
+		errors.HandleBadRequest(c, err)
+	}
+
+	bytes, err := services.ApplyGryScale(imgBuffer.Bytes())
+
+	if err != nil {
+		errors.HandleBadRequest(c, err)
+	}
+
+	c.Set("Content-Type", "image/png")
+	return c.Send(bytes)
 
 }
