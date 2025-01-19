@@ -43,3 +43,21 @@ func normalizeAngle(angle float64) float64 {
 	}
 	return normalized
 }
+
+func Resize(imgBytes []byte, width int, height int) ([]byte, error) {
+	image, err := imaging.Decode(bytes.NewReader(imgBytes), imaging.AutoOrientation(true))
+
+	if err != nil {
+		return nil, err
+	}
+
+	NRGBA := imaging.Resize(image, width, height, imaging.Lanczos)
+
+	var buf bytes.Buffer
+
+	if err := imaging.Encode(&buf, NRGBA, imaging.PNG); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
