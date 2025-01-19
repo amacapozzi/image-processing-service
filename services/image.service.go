@@ -61,3 +61,20 @@ func Resize(imgBytes []byte, width int, height int) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+func ApplyGryScale(imgBytes []byte) ([]byte, error) {
+
+	image, err := imaging.Decode(bytes.NewReader(imgBytes))
+
+	if err != nil {
+		return nil, err
+	}
+
+	NRGBA := imaging.Grayscale(image)
+
+	var imgBuffer bytes.Buffer
+
+	imaging.Encode(&imgBuffer, NRGBA, imaging.PNG)
+
+	return imgBuffer.Bytes(), nil
+}
