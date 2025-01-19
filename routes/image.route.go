@@ -8,4 +8,5 @@ import (
 
 func SetupImageRoutes(app *fiber.App) {
 	app.Post("/image/rotate/:angle", controllers.HandleRotateImage)
+	app.Post("/image/resize", controllers.HandleGrayScale)
 }
