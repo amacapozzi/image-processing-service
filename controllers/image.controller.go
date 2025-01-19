@@ -2,20 +2,23 @@ package controllers
 
 import (
 	"bytes"
-	"fmt"
 	"image-processor-server/services"
 	"io"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func HandleUploadImage(c *fiber.Ctx) error {
+func HandleRotateImage(c *fiber.Ctx) error {
 	file, err := c.FormFile("image")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	angleValue := c.Params("angle")
+	angleInt, _ := strconv.Atoi(angleValue)
 
 	multipartFile, err := file.Open()
 	if err != nil {
@@ -28,7 +31,7 @@ func HandleUploadImage(c *fiber.Ctx) error {
 	fileBuffer := &bytes.Buffer{}
 	if _, err := io.Copy(fileBuffer, multipartFile); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to read image: " + err.Error(),
+			"error": "Failed to read image " + err.Error(),
 		})
 	}
 
@@ -40,15 +43,14 @@ func HandleUploadImage(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println("Tamaño del archivo:", len(fileBuffer.Bytes()))
-	img, err := services.Rotate(fileBuffer.Bytes())
+	rotatedImgBytes, err := services.Rotate(fileBuffer.Bytes(), float64(angleInt), "rotate")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to process image: " + err.Error(),
+			"error": "Failed to process image " + err.Error(),
 		})
 	}
 
-	fmt.Println(img.ColorModel())
+	c.Set("Content-Type", "image/png")
+	return c.Send(rotatedImgBytes)
 
-	return c.Status(fiber.StatusOK).SendString("Image upload successful")
 }
