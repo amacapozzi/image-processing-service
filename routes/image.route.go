@@ -7,5 +7,5 @@ import (
 )
 
 func SetupImageRoutes(app *fiber.App) {
-	app.Post("/image/upload", controllers.HandleUploadImage)
+	app.Post("/image/rotate/:angle", controllers.HandleRotateImage)
 }
